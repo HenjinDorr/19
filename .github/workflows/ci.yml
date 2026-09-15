@@ -1,0 +1,38 @@
+name: Shipping CI-CD
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получение исходного кода
+        uses: actions/checkout@v4
+
+      - name: Установка Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установка зависимостей
+        run: python -m pip install -r requirements.txt
+
+      - name: Запуск тестов
+        run: python -m pytest -v
+
+      - name: Создание архива
+        run: >
+          python -m zipfile -c shipping-module.zip
+          shipping.py CHANGELOG.md
+
+      - name: Сохранение архива
+        uses: actions/upload-artifact@v4
+        with:
+          name: shipping-module
+          path: shipping-module.zip
